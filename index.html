@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desafio CRUD Completo 2026 — Loja de Roupas Online</title>
+  <meta name="description" content="Modelagem UML do sistema de compra, venda e estoque de uma loja de roupas online, construído em Python apenas com funções e dicionários.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="layout">
+
+  <!-- ===================== MENU LATERAL ===================== -->
+  <aside class="sidebar">
+    <div class="brand">Desafio CRUD 2026<small>Loja de Roupas Online · Python</small></div>
+    <nav>
+      <div class="group">Começo</div>
+      <a href="#visao-geral">1. Visão geral</a>
+      <a href="#times">2. Times e responsabilidades</a>
+      <a href="#regras">3. Regras do desafio</a>
+
+      <div class="group">Visões UML</div>
+      <a href="#casos-de-uso">4. Casos de uso</a>
+      <a href="#componentes">5. Componentes (módulos)</a>
+      <a href="#dependencias">6. Mapa de dependências</a>
+      <a href="#dados">7. Modelo de dados</a>
+      <a href="#sequencia">8. Diagramas de sequência</a>
+      <a href="#atividades">9. Diagramas de atividade</a>
+      <a href="#estados">10. Diagramas de estado</a>
+      <a href="#jornada">11. Jornada do usuário</a>
+
+      <div class="group">Construção</div>
+      <a href="#contrato">12. Contrato de funções</a>
+      <a href="#integracao">13. Plano de integração</a>
+      <a href="#sugestoes">14. Sugestões de melhoria</a>
+    </nav>
+  </aside>
+
+  <!-- ===================== CONTEÚDO ===================== -->
+  <main class="content">
+
+    <div class="hero">
+      <h1>Sistema de Compra, Venda e Estoque</h1>
+      <p class="lead">Loja de roupas online · Desafio CRUD Completo 2026 · Modelagem UML para construção em equipe</p>
+      <p>
+        Uma vendedora recebe pedidos pela internet e precisa de um sistema de terminal para
+        <strong>cadastrar produtos e clientes</strong>, <strong>registrar vendas</strong>,
+        <strong>repor estoque (compras)</strong> e <strong>acompanhar o caixa</strong>.
+        Cada dupla constrói um pedaço; o sistema só funciona quando as peças se encaixam.
+      </p>
+      <div class="badges">
+        <span class="badge">🐍 Python puro</span>
+        <span class="badge">🧩 Só funções + dicionários</span>
+        <span class="badge">🚫 Sem classes, sem bibliotecas, sem arquivos</span>
+        <span class="badge">💻 Roda no terminal (prompt)</span>
+        <span class="badge">👥 6 times · 1 sistema</span>
+      </div>
+    </div>
+
+    <!-- ===================== 1. VISÃO GERAL ===================== -->
+    <section id="visao-geral">
+      <span class="section-tag">Começo</span>
+      <h2>1. Visão geral — do quadro para o UML</h2>
+      <p class="lead">O esquema do quadro traduzido em módulos, com quem fala com quem.</p>
+
+      <figure class="board">
+        <img src="img/quadro.jpg" alt="Esquema original desenhado no quadro" onerror="this.parentElement.style.display='none'">
+        <figcaption>Esquema original no quadro: cadastro, coleta de dados, venda/compra, atualizar, estoque, salvar dados (dicionário) e manipulação matemática de valores.</figcaption>
+      </figure>
+
+      <p>
+        No quadro havia sete ideias: <em>cadastro</em>, <em>coleta de dados</em>, <em>venda/compra</em>,
+        <em>atualizar</em>, <em>estoque</em>, <em>salvar dados no dicionário</em> e <em>manipulação matemática</em>.
+        No diagrama abaixo elas viram <strong>seis módulos</strong> (um por time) em volta de um
+        <strong>dicionário central</strong>. O módulo de <strong>Atualização e Integração</strong> é a cola:
+        ele monta os fluxos de venda e compra chamando funções dos outros cinco.
+      </p>
+
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+flowchart LR
+    V(["👩 Vendedora<br/>(usuária do terminal)"])
+
+    subgraph S["Sistema da Loja — Python no terminal"]
+        direction TB
+        I["🖥️ Interface<br/><small>prints estáticos, menus, tabelas</small>"]
+        C["⌨️ Coleta de dados<br/><small>inputs validados</small>"]
+        CA["📝 Cadastro<br/><small>salvar e buscar nos dicionários</small>"]
+        M["🧮 Cálculos<br/><small>totais, descontos, lucro</small>"]
+        E["📦 Estoque<br/><small>entrada, saída, alertas</small>"]
+        A["🔄 Atualização e Integração<br/><small>menu, venda, compra, alterar, remover</small>"]
+        D[("🗄️ Dicionário sistema<br/>produtos · clientes<br/>vendas · compras · caixa")]
+    end
+
+    V -->|digita| C
+    I -->|mostra| V
+    A -->|chama| I
+    A -->|chama| C
+    A -->|chama| CA
+    A -->|chama| M
+    A -->|chama| E
+    CA -->|grava| D
+    E -->|altera quantidade| D
+    A -->|altera / remove| D
+    M -.->|lê| D
+    I -.->|lê| D
+
+    classDef t1 fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a;
+    classDef t2 fill:#d1fae5,stroke:#10b981,color:#064e3b;
+    classDef t3 fill:#fef3c7,stroke:#f59e0b,color:#78350f;
+    classDef t4 fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95;
+    classDef t5 fill:#fee2e2,stroke:#ef4444,color:#7f1d1d;
+    classDef t6 fill:#fce7f3,stroke:#ec4899,color:#831843;
+    classDef data fill:#f3f4f6,stroke:#4b5366,color:#1f2430;
+    class I t1; class C t2; class CA t3; class M t4; class E t5; class A t6; class D data;
+        </pre>
+      </div>
+      <p class="caption">Diagrama de contexto. Setas cheias = chamada de função ou escrita; setas tracejadas = apenas leitura dos dados.</p>
+
+      <div class="legend">
+        <span style="--c:#3b82f6">Time 1 · Interface</span>
+        <span style="--c:#10b981">Time 2 · Coleta</span>
+        <span style="--c:#f59e0b">Time 3 · Cadastro</span>
+        <span style="--c:#8b5cf6">Time 4 · Cálculos</span>
+        <span style="--c:#ef4444">Time 5 · Estoque</span>
+        <span style="--c:#ec4899">Time 6 · Atualização e Integração</span>
+      </div>
+    </section>
+
+    <!-- ===================== 2. TIMES ===================== -->
+    <section id="times">
+      <span class="section-tag">Começo</span>
+      <h2>2. Times e responsabilidades</h2>
+      <p class="lead">Cada time entrega um arquivo <code>.py</code> contendo apenas funções. Nenhuma função guarda dados: tudo que muda é recebido por parâmetro.</p>
+
+      <div class="cards">
+        <div class="card t1">
+          <h3><span class="pill t1">Time 1</span> Prints estáticos (Interface)</h3>
+          <div class="file">Arquivo: <code>interface.py</code> · prefixo <code>exibir_</code></div>
+          <p>Tudo o que aparece na tela: cabeçalho, menus, tabelas, recibo, mensagens de erro/sucesso. Não lê teclado e não altera dicionários.</p>
+          <ul>
+            <li><code>exibir_menu_principal()</code></li>
+            <li><code>exibir_tabela_produtos(produtos)</code></li>
+            <li><code>exibir_recibo(venda, produtos, clientes)</code></li>
+            <li><code>exibir_mensagem(texto, tipo)</code></li>
+          </ul>
+          <div class="dep">Depende de: Time 4 (<code>formatar_moeda</code>) e Time 5 (<code>situacao_produto</code>)</div>
+        </div>
+
+        <div class="card t2">
+          <h3><span class="pill t2">Time 2</span> Coleta de dados</h3>
+          <div class="file">Arquivo: <code>coleta.py</code> · prefixos <code>ler_</code>, <code>coletar_</code></div>
+          <p>Todos os <code>input()</code> do sistema, com validação e repetição até o usuário digitar algo válido. Devolve valores prontos (int, float, str, dict).</p>
+          <ul>
+            <li><code>ler_inteiro(mensagem, minimo)</code></li>
+            <li><code>ler_decimal(mensagem, minimo)</code></li>
+            <li><code>coletar_dados_produto()</code> → dict</li>
+            <li><code>coletar_item()</code> → {codigo, quantidade}</li>
+          </ul>
+          <div class="dep">Depende de: Time 1 (<code>exibir_mensagem</code>)</div>
+        </div>
+
+        <div class="card t3">
+          <h3><span class="pill t3">Time 3</span> Cadastro de dados</h3>
+          <div class="file">Arquivo: <code>cadastro.py</code> · prefixos <code>cadastrar_</code>, <code>registrar_</code>, <code>buscar_</code></div>
+          <p>Guarda e localiza registros nos dicionários. Gera códigos automáticos. É a única porta de entrada para criar registros.</p>
+          <ul>
+            <li><code>gerar_codigo(dicionario)</code></li>
+            <li><code>cadastrar_produto(produtos, dados)</code></li>
+            <li><code>registrar_venda(vendas, venda)</code></li>
+            <li><code>buscar_produto(produtos, codigo)</code></li>
+          </ul>
+          <div class="dep">Depende de: ninguém (módulo base)</div>
+        </div>
+
+        <div class="card t4">
+          <h3><span class="pill t4">Time 4</span> Manipulações matemáticas</h3>
+          <div class="file">Arquivo: <code>calculos.py</code> · prefixos <code>calcular_</code>, <code>formatar_</code></div>
+          <p>Toda conta do sistema: subtotal, total, desconto, troco, lucro, margem, valor do estoque, resumo financeiro. Funções puras: recebem, calculam, devolvem.</p>
+          <ul>
+            <li><code>calcular_total_itens(itens, produtos)</code></li>
+            <li><code>aplicar_desconto(valor, percentual)</code></li>
+            <li><code>calcular_lucro_venda(itens, produtos)</code></li>
+            <li><code>formatar_moeda(valor)</code> → "R$ 1.234,50"</li>
+          </ul>
+          <div class="dep">Depende de: Time 3 (<code>buscar_produto</code>)</div>
+        </div>
+
+        <div class="card t5">
+          <h3><span class="pill t5">Time 5</span> Controle de estoque</h3>
+          <div class="file">Arquivo: <code>estoque.py</code> · prefixos <code>verificar_</code>, <code>baixar_</code>, <code>repor_</code>, <code>relatorio_</code></div>
+          <p>Quantidade de cada produto: confere disponibilidade, dá baixa na venda, repõe na compra, aponta produtos em falta e esgotados.</p>
+          <ul>
+            <li><code>verificar_disponibilidade(produtos, codigo, qtd)</code></li>
+            <li><code>baixar_estoque_itens(produtos, itens)</code></li>
+            <li><code>repor_estoque_itens(produtos, itens)</code></li>
+            <li><code>relatorio_estoque(produtos, minimo)</code></li>
+          </ul>
+          <div class="dep">Depende de: Time 3 (<code>buscar_produto</code>)</div>
+        </div>
+
+        <div class="card t6">
+          <h3><span class="pill t6">Time 6</span> Atualizações e Integração</h3>
+          <div class="file">Arquivos: <code>atualizacao.py</code> e <code>main.py</code> · prefixos <code>atualizar_</code>, <code>remover_</code>, <code>fluxo_</code>, <code>menu_</code></div>
+          <p>Altera e remove registros, controla o caixa e monta os fluxos completos (venda, compra, relatórios) ligando as funções dos outros times no menu principal.</p>
+          <ul>
+            <li><code>atualizar_produto(produtos, codigo, campo, valor)</code></li>
+            <li><code>remover_produto(produtos, codigo)</code></li>
+            <li><code>fluxo_realizar_venda(sistema)</code></li>
+            <li><code>executar_sistema(sistema)</code> — laço principal</li>
+          </ul>
+          <div class="dep">Depende de: todos os times</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 3. REGRAS ===================== -->
+    <section id="regras">
+      <span class="section-tag">Começo</span>
+      <h2>3. Regras do desafio e convenções</h2>
+      <p class="lead">Limites técnicos e combinados de nomenclatura para o código de todos encaixar.</p>
+
+      <h3>Limites técnicos</h3>
+      <table>
+        <tr><th style="width:30%">Pode</th><th>Não pode</th></tr>
+        <tr>
+          <td>
+            Funções (<code>def</code>), parâmetros e <code>return</code><br>
+            Dicionários, listas simples, strings, números, booleanos<br>
+            <code>if / elif / else</code>, <code>for</code>, <code>while</code><br>
+            <code>input()</code>, <code>print()</code>, f-strings<br>
+            <code>import</code> dos arquivos dos outros times
+          </td>
+          <td>
+            Classes (<code>class</code>) e orientação a objetos<br>
+            Bibliotecas externas (pandas, rich, etc.)<br>
+            Salvar em arquivo ou banco de dados (os dados vivem só na execução)<br>
+            Variáveis globais alteradas dentro de funções (<code>global</code>)<br>
+            Interface gráfica — é tudo no terminal
+          </td>
+        </tr>
+      </table>
+
+      <h3>Convenções obrigatórias</h3>
+      <ul>
+        <li><strong>snake_case</strong> para funções e variáveis: <code>cadastrar_produto</code>, <code>preco_venda</code>.</li>
+        <li><strong>Verbo no infinitivo</strong> no início do nome, usando o prefixo do time (ver cards acima).</li>
+        <li><strong>Dicionário sempre por parâmetro.</strong> Nenhuma função usa variável global. Quem precisa alterar <code>produtos</code> recebe <code>produtos</code>.</li>
+        <li><strong>Retornos padronizados:</strong> operações devolvem <code>True/False</code>; buscas devolvem o dicionário encontrado ou <code>None</code>; cadastros devolvem o código gerado.</li>
+        <li><strong>Códigos são inteiros</strong> gerados por <code>gerar_codigo()</code> (maior código + 1, começando em 1).</li>
+        <li><strong>Dinheiro é <code>float</code></strong>, percentual de desconto é número de 0 a 100.</li>
+        <li><strong>Uma função, uma tarefa.</strong> Se passou de ~25 linhas, provavelmente são duas funções.</li>
+        <li><strong>Docstring curta</strong> em toda função: o que faz, o que recebe, o que devolve.</li>
+      </ul>
+
+      <div class="callout">
+        <strong>A regra de ouro:</strong> só o Time 6 chama funções de todos os outros. Os demais times chamam no máximo um ou dois módulos vizinhos (ver <a href="#dependencias">mapa de dependências</a>). Isso evita o sistema virar um novelo.
+      </div>
+    </section>
+
+    <!-- ===================== 4. CASOS DE USO ===================== -->
+    <section id="casos-de-uso">
+      <span class="section-tag">Visão UML</span>
+      <h2>4. Diagrama de casos de uso</h2>
+      <p class="lead">O que o sistema faz, do ponto de vista de quem usa. Responde "para que serve" antes de "como funciona".</p>
+
+      <p>
+        Só a <strong>Vendedora</strong> opera o terminal. O <strong>Cliente</strong> e o <strong>Fornecedor</strong> são
+        atores secundários: participam da venda e da compra na vida real, mas não digitam nada no sistema.
+      </p>
+
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+flowchart LR
+    Vend["🧍‍♀️ Vendedora<br/>(dona da loja)"]
+    Cli["🧍 Cliente<br/>(pede pela internet)"]
+    Forn["🏭 Fornecedor<br/>(vende as peças para a loja)"]
+
+    subgraph Sistema["Sistema Loja de Roupas Online"]
+        direction TB
+        UC1(["Cadastrar produto"])
+        UC2(["Cadastrar cliente"])
+        UC3(["Registrar venda"])
+        UC4(["Registrar compra<br/>(reposição)"])
+        UC5(["Consultar estoque"])
+        UC6(["Atualizar dados"])
+        UC7(["Remover dados"])
+        UC8(["Ver relatório financeiro"])
+
+        UC9(["Verificar disponibilidade"])
+        UC10(["Calcular total"])
+        UC11(["Baixar estoque"])
+        UC12(["Repor estoque"])
+        UC13(["Aplicar desconto"])
+        UC14(["Emitir recibo"])
+        UC15(["Atualizar caixa"])
+    end
+
+    Vend --> UC1 & UC2 & UC3 & UC4 & UC5 & UC6 & UC7 & UC8
+    Cli -.-> UC3
+    Forn -.-> UC4
+
+    UC3 -.->|"«include»"| UC9
+    UC3 -.->|"«include»"| UC10
+    UC3 -.->|"«include»"| UC11
+    UC3 -.->|"«include»"| UC14
+    UC3 -.->|"«include»"| UC15
+    UC13 -.->|"«extend»"| UC3
+    UC4 -.->|"«include»"| UC10
+    UC4 -.->|"«include»"| UC12
+    UC4 -.->|"«include»"| UC15
+
+    classDef ator fill:#fff,stroke:#1f2430,stroke-width:2px;
+    classDef principal fill:#eef0fb,stroke:#6d5dfc;
+    classDef interno fill:#f3f4f6,stroke:#9ca3af,stroke-dasharray:4 3;
+    class Vend,Cli,Forn ator;
+    class UC1,UC2,UC3,UC4,UC5,UC6,UC7,UC8 principal;
+    class UC9,UC10,UC11,UC12,UC13,UC14,UC15 interno;
+        </pre>
+      </div>
+      <p class="caption">
+        <strong>«include»</strong>: sempre acontece dentro do caso de uso principal (toda venda calcula total e baixa estoque).
+        <strong>«extend»</strong>: acontece só às vezes (desconto é opcional).
+        Casos tracejados são internos — o usuário não os escolhe no menu.
+      </p>
+
+      <h3>Descrição dos casos de uso principais</h3>
+      <table>
+        <tr><th style="width:20%">Caso de uso</th><th>Pré-condição</th><th>Fluxo principal (resumo)</th><th>Pós-condição</th></tr>
+        <tr>
+          <td><strong>Cadastrar produto</strong></td>
+          <td>—</td>
+          <td>Vendedora informa nome, categoria, tamanho, cor, preço de custo, preço de venda e quantidade inicial. Sistema gera código e salva.</td>
+          <td>Produto existe em <code>produtos</code> com código novo.</td>
+        </tr>
+        <tr>
+          <td><strong>Cadastrar cliente</strong></td>
+          <td>—</td>
+          <td>Vendedora informa nome, telefone e cidade. Sistema gera código e salva.</td>
+          <td>Cliente existe em <code>clientes</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>Registrar venda</strong></td>
+          <td>Existe ao menos 1 cliente e 1 produto com estoque.</td>
+          <td>Escolhe cliente → adiciona itens (código + quantidade) conferindo disponibilidade → calcula total → desconto opcional → forma de pagamento → confirma.</td>
+          <td>Venda salva em <code>vendas</code>, estoque baixado, caixa somado, recibo exibido.</td>
+        </tr>
+        <tr>
+          <td><strong>Registrar compra (reposição)</strong></td>
+          <td>Produto já cadastrado.</td>
+          <td>Informa fornecedor → adiciona itens (código + quantidade) → calcula total pelo preço de custo → confirma.</td>
+          <td>Compra salva em <code>compras</code>, estoque reposto, caixa subtraído.</td>
+        </tr>
+        <tr>
+          <td><strong>Consultar estoque</strong></td>
+          <td>—</td>
+          <td>Sistema lista produtos com quantidade, situação (OK / BAIXO / ESGOTADO) e valor total parado em estoque.</td>
+          <td>Nada muda.</td>
+        </tr>
+        <tr>
+          <td><strong>Atualizar dados</strong></td>
+          <td>Registro existe.</td>
+          <td>Escolhe produto/cliente pelo código → escolhe campo → informa novo valor → confirma.</td>
+          <td>Campo alterado no dicionário.</td>
+        </tr>
+        <tr>
+          <td><strong>Remover dados</strong></td>
+          <td>Registro existe.</td>
+          <td>Escolhe pelo código → sistema mostra o registro → pede confirmação → remove.</td>
+          <td>Chave removida do dicionário.</td>
+        </tr>
+        <tr>
+          <td><strong>Ver relatório financeiro</strong></td>
+          <td>—</td>
+          <td>Sistema soma vendas, compras, calcula saldo, lucro e ticket médio.</td>
+          <td>Nada muda.</td>
+        </tr>
+      </table>
+    </section>
+
+    <!-- ===================== 5. COMPONENTES ===================== -->
+    <section id="componentes">
+      <span class="section-tag">Visão UML</span>
+      <h2>5. Diagrama de componentes (módulos)</h2>
+      <p class="lead">Como os arquivos <code>.py</code> se organizam e quem importa quem. Cada caixa é um arquivo de um time.</p>
+
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+flowchart TB
+    subgraph T6["main.py + atualizacao.py — Time 6"]
+        direction LR
+        M1["executar_sistema()"]
+        M2["menu_produtos() · menu_clientes()<br/>menu_vendas() · menu_compras()<br/>menu_estoque() · menu_relatorios()"]
+        M3["fluxo_realizar_venda()<br/>fluxo_realizar_compra()<br/>fluxo_cadastrar_produto() ..."]
+        M4["atualizar_produto() · remover_produto()<br/>atualizar_cliente() · remover_cliente()<br/>atualizar_caixa()"]
+    end
+
+    subgraph T1["interface.py — Time 1"]
+        I1["exibir_cabecalho() · exibir_linha()<br/>exibir_menu_*()<br/>exibir_tabela_produtos() · exibir_tabela_clientes()<br/>exibir_recibo() · exibir_relatorio_estoque()<br/>exibir_resumo_financeiro() · exibir_mensagem()"]
+    end
+
+    subgraph T2["coleta.py — Time 2"]
+        C1["ler_texto() · ler_inteiro() · ler_decimal()<br/>ler_opcao() · confirmar()<br/>coletar_dados_produto() · coletar_dados_cliente()<br/>coletar_item() · coletar_desconto()<br/>coletar_forma_pagamento()"]
+    end
+
+    subgraph T3["cadastro.py — Time 3"]
+        CA1["gerar_codigo() · existe()<br/>cadastrar_produto() · cadastrar_cliente()<br/>registrar_venda() · registrar_compra()<br/>buscar_produto() · buscar_cliente()<br/>buscar_produto_por_nome()"]
+    end
+
+    subgraph T4["calculos.py — Time 4"]
+        CAL1["calcular_subtotal() · calcular_total_itens()<br/>calcular_total_compra() · aplicar_desconto()<br/>calcular_troco() · calcular_margem()<br/>calcular_lucro_venda() · calcular_valor_estoque()<br/>resumo_financeiro() · formatar_moeda()"]
+    end
+
+    subgraph T5["estoque.py — Time 5"]
+        E1["verificar_disponibilidade()<br/>baixar_estoque() · repor_estoque()<br/>baixar_estoque_itens() · repor_estoque_itens()<br/>situacao_produto() · produtos_em_falta()<br/>produtos_esgotados() · relatorio_estoque()"]
+    end
+
+    subgraph T0["dados.py — compartilhado"]
+        D1["criar_sistema()<br/>→ dicionário com dados de exemplo"]
+    end
+
+    T6 -->|import| T1
+    T6 -->|import| T2
+    T6 -->|import| T3
+    T6 -->|import| T4
+    T6 -->|import| T5
+    T6 -->|import| T0
+    T2 -->|import| T1
+    T1 -->|import| T4
+    T1 -->|import| T5
+    T4 -->|import| T3
+    T5 -->|import| T3
+
+    classDef t1 fill:#dbeafe,stroke:#3b82f6;
+    classDef t2 fill:#d1fae5,stroke:#10b981;
+    classDef t3 fill:#fef3c7,stroke:#f59e0b;
+    classDef t4 fill:#ede9fe,stroke:#8b5cf6;
+    classDef t5 fill:#fee2e2,stroke:#ef4444;
+    classDef t6 fill:#fce7f3,stroke:#ec4899;
+    classDef t0 fill:#f3f4f6,stroke:#4b5366;
+    class I1 t1; class C1 t2; class CA1 t3; class CAL1 t4; class E1 t5; class M1,M2,M3,M4 t6; class D1 t0;
+        </pre>
+      </div>
+      <p class="caption">Setas = <code>import</code>. Note que não há ciclo: <code>cadastro.py</code> não importa ninguém, e só o <code>main.py</code> importa todos.</p>
+
+      <h3>Estrutura de pastas do projeto final</h3>
+      <pre class="code">loja_roupas/
+├── main.py           ← Time 6: menu principal e fluxos (python main.py)
+├── atualizacao.py    ← Time 6: atualizar, remover, caixa
+├── interface.py      ← Time 1: prints
+├── coleta.py         ← Time 2: inputs
+├── cadastro.py       ← Time 3: salvar/buscar
+├── calculos.py       ← Time 4: matemática
+├── estoque.py        ← Time 5: quantidades
+└── dados.py          ← compartilhado: dados de exemplo para testar</pre>
+
+      <div class="callout ok">
+        O esqueleto desses arquivos, já com nomes, parâmetros e docstrings, está na pasta <code>esqueleto/</code> deste repositório. Cada time só preenche o corpo das próprias funções.
+      </div>
+    </section>
+
+    <!-- ===================== 6. DEPENDÊNCIAS ===================== -->
+    <section id="dependencias">
+      <span class="section-tag">Visão UML</span>
+      <h2>6. Mapa de dependências entre funções</h2>
+      <p class="lead">A visão mais importante para o trabalho em equipe: quais funções se cruzam e precisam umas das outras.</p>
+
+      <p>
+        Setas saem de quem <strong>chama</strong> para quem <strong>é chamada</strong>. Se a sua função está na ponta de uma seta,
+        outro time depende de você: o nome, os parâmetros e o retorno não podem mudar sem avisar.
+      </p>
+
+      <h3>6.1 Camadas: quem depende de quem (visão por módulo)</h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+flowchart TB
+    T6["🔄 Time 6 — main.py / atualizacao.py<br/><small>fluxo_realizar_venda · fluxo_realizar_compra · menus · atualizar_ · remover_</small>"]
+    T2["⌨️ Time 2 — coleta.py<br/><small>ler_ · coletar_ · confirmar</small>"]
+    T1["🖥️ Time 1 — interface.py<br/><small>exibir_</small>"]
+    T5["📦 Time 5 — estoque.py<br/><small>verificar_ · baixar_ · repor_ · relatorio_</small>"]
+    T4["🧮 Time 4 — calculos.py<br/><small>calcular_ · formatar_moeda</small>"]
+    T3["📝 Time 3 — cadastro.py<br/><small>gerar_codigo · cadastrar_ · registrar_ · buscar_</small>"]
+
+    T6 -->|"todas as funções"| T2
+    T6 -->|"todas as funções"| T1
+    T6 -->|"verificar_disponibilidade<br/>baixar/repor_estoque_itens<br/>relatorio_estoque"| T5
+    T6 -->|"calcular_total_itens<br/>aplicar_desconto<br/>resumo_financeiro"| T4
+    T6 -->|"buscar_ · cadastrar_<br/>registrar_"| T3
+    T2 -->|"exibir_mensagem"| T1
+    T1 -->|"formatar_moeda"| T4
+    T1 -->|"situacao_produto"| T5
+    T5 -->|"buscar_produto"| T3
+    T4 -->|"buscar_produto"| T3
+
+    classDef t1 fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a;
+    classDef t2 fill:#d1fae5,stroke:#10b981,color:#064e3b;
+    classDef t3 fill:#fef3c7,stroke:#f59e0b,color:#78350f;
+    classDef t4 fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95;
+    classDef t5 fill:#fee2e2,stroke:#ef4444,color:#7f1d1d;
+    classDef t6 fill:#fce7f3,stroke:#ec4899,color:#831843;
+    class T1 t1; class T2 t2; class T3 t3; class T4 t4; class T5 t5; class T6 t6;
+        </pre>
+      </div>
+      <p class="caption">Leitura de cima para baixo: quem está em cima depende de quem está embaixo. <code>cadastro.py</code> é a fundação — não depende de ninguém e todos chegam nele.</p>
+
+      <h3>6.2 O que <code>fluxo_realizar_venda</code> chama (visão por função)</h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+flowchart LR
+    FV["fluxo_realizar_venda<br/><small>Time 6</small>"]
+
+    subgraph T1["interface.py — T1"]
+        ETC["exibir_tabela_clientes"]
+        ETP["exibir_tabela_produtos"]
+        EM["exibir_mensagem"]
+        ER["exibir_recibo"]
+    end
+    subgraph T2["coleta.py — T2"]
+        LI["ler_inteiro"]
+        CI["coletar_item"]
+        CF["confirmar"]
+        CD["coletar_desconto"]
+        CFP["coletar_forma_pagamento"]
+    end
+    subgraph T5["estoque.py — T5"]
+        VD["verificar_disponibilidade"]
+        BEI["baixar_estoque_itens"]
+    end
+    subgraph T4["calculos.py — T4"]
+        CT["calcular_total_itens"]
+        AD["aplicar_desconto"]
+        FM["formatar_moeda"]
+    end
+    subgraph T3["cadastro.py — T3"]
+        BC["buscar_cliente"]
+        BP["buscar_produto"]
+        RV["registrar_venda"]
+        GC["gerar_codigo"]
+    end
+    AC["atualizar_caixa<br/><small>Time 6</small>"]
+
+    FV --> ETC & ETP & EM & ER
+    FV --> LI & CI & CF & CD & CFP
+    FV --> VD & BEI
+    FV --> CT & AD
+    FV --> BC & RV
+    FV --> AC
+    VD --> BP
+    BEI --> BP
+    CT --> BP
+    RV --> GC
+    ER --> FM
+    ETP --> FM
+    CI --> LI
+    LI --> EM
+
+    classDef t1 fill:#dbeafe,stroke:#3b82f6;
+    classDef t2 fill:#d1fae5,stroke:#10b981;
+    classDef t3 fill:#fef3c7,stroke:#f59e0b;
+    classDef t4 fill:#ede9fe,stroke:#8b5cf6;
+    classDef t5 fill:#fee2e2,stroke:#ef4444;
+    classDef t6 fill:#fce7f3,stroke:#ec4899;
+    class ETC,ETP,EM,ER t1;
+    class LI,CI,CF,CD,CFP t2;
+    class BC,BP,RV,GC t3;
+    class CT,AD,FM t4;
+    class VD,BEI t5;
+    class FV,AC t6;
+        </pre>
+      </div>
+      <p class="caption">Uma única função do Time 6 encosta em 17 funções de 5 times — e algumas delas chamam outras (segundo nível). Se <code>buscar_produto</code> quebrar, a venda inteira quebra.</p>
+
+      <h3>6.3 O que <code>fluxo_realizar_compra</code> e o CRUD chamam</h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+flowchart LR
+    FC["fluxo_realizar_compra"]
+    FP["fluxo_cadastrar_produto"]
+    FA["fluxo_atualizar_produto"]
+    FR["fluxo_relatorio_estoque"]
+
+    subgraph T1["interface.py — T1"]
+        ETP["exibir_tabela_produtos"]
+        EP["exibir_produto"]
+        ERE["exibir_relatorio_estoque"]
+        EM["exibir_mensagem"]
+    end
+    subgraph T2["coleta.py — T2"]
+        LT["ler_texto"]
+        LI["ler_inteiro"]
+        LO["ler_opcao"]
+        CI["coletar_item"]
+        CDP["coletar_dados_produto"]
+        CF["confirmar"]
+    end
+    subgraph T5["estoque.py — T5"]
+        REI["repor_estoque_itens"]
+        RE["relatorio_estoque"]
+        SP["situacao_produto"]
+    end
+    subgraph T4["calculos.py — T4"]
+        CTC["calcular_total_compra"]
+        CVE["calcular_valor_estoque"]
+    end
+    subgraph T3["cadastro.py — T3"]
+        BP["buscar_produto"]
+        CP["cadastrar_produto"]
+        RC["registrar_compra"]
+    end
+    subgraph T6b["atualizacao.py — T6"]
+        AP["atualizar_produto"]
+        AC["atualizar_caixa"]
+    end
+
+    FC --> LT & ETP & CI & BP & CTC & CF & REI & RC & AC & EM
+    FP --> CDP & CP & EM
+    FA --> ETP & LI & BP & EP & LO & AP & EM
+    FR --> RE & CVE & ERE
+    RE --> SP
+    REI --> BP
+    CTC --> BP
+
+    classDef t1 fill:#dbeafe,stroke:#3b82f6;
+    classDef t2 fill:#d1fae5,stroke:#10b981;
+    classDef t3 fill:#fef3c7,stroke:#f59e0b;
+    classDef t4 fill:#ede9fe,stroke:#8b5cf6;
+    classDef t5 fill:#fee2e2,stroke:#ef4444;
+    classDef t6 fill:#fce7f3,stroke:#ec4899;
+    class ETP,EP,ERE,EM t1;
+    class LT,LI,LO,CI,CDP,CF t2;
+    class BP,CP,RC t3;
+    class CTC,CVE t4;
+    class REI,RE,SP t5;
+    class FC,FP,FA,FR,AP,AC t6;
+        </pre>
+      </div>
+      <p class="caption">Função mais requisitada do sistema: <code>buscar_produto</code> (Time 3). Mais chamadora: <code>fluxo_realizar_venda</code> (Time 6).</p>
+
+      <h3>Matriz de dependência entre times</h3>
+      <p>Leia por linha: "o time da linha <strong>usa</strong> funções do time da coluna".</p>
+      <table class="matrix">
+        <tr>
+          <th>usa →</th>
+          <th><span class="pill t1">T1</span> Interface</th>
+          <th><span class="pill t2">T2</span> Coleta</th>
+          <th><span class="pill t3">T3</span> Cadastro</th>
+          <th><span class="pill t4">T4</span> Cálculos</th>
+          <th><span class="pill t5">T5</span> Estoque</th>
+          <th><span class="pill t6">T6</span> Integração</th>
+        </tr>
+        <tr><td>T1 Interface</td><td class="self">—</td><td></td><td></td><td class="yes">✔ formatar_moeda</td><td class="yes">✔ situacao_produto</td><td></td></tr>
+        <tr><td>T2 Coleta</td><td class="yes">✔ exibir_mensagem</td><td class="self">—</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>T3 Cadastro</td><td></td><td></td><td class="self">—</td><td></td><td></td><td></td></tr>
+        <tr><td>T4 Cálculos</td><td></td><td></td><td class="yes">✔ buscar_produto</td><td class="self">—</td><td></td><td></td></tr>
+        <tr><td>T5 Estoque</td><td></td><td></td><td class="yes">✔ buscar_produto</td><td></td><td class="self">—</td><td></td></tr>
+        <tr><td>T6 Integração</td><td class="yes">✔ tudo</td><td class="yes">✔ tudo</td><td class="yes">✔ tudo</td><td class="yes">✔ tudo</td><td class="yes">✔ tudo</td><td class="self">—</td></tr>
+      </table>
+
+      <div class="callout warn">
+        <strong>Ordem de prontidão:</strong> o Time 3 (Cadastro) é a base — Cálculos e Estoque não conseguem testar sem <code>buscar_produto</code>. Em seguida Time 4 (Cálculos), porque Interface precisa de <code>formatar_moeda</code>. O Time 6 é o último a fechar, mas deve começar cedo escrevendo o menu com funções "de mentira" (stubs).
+      </div>
+    </section>
+
+    <!-- ===================== 7. MODELO DE DADOS ===================== -->
+    <section id="dados">
+      <span class="section-tag">Visão UML</span>
+      <h2>7. Modelo de dados (dicionários)</h2>
+      <p class="lead">Um diagrama de classes adaptado: cada "classe" aqui é na verdade um dicionário Python. O desafio não usa classes.</p>
+
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+classDiagram
+    direction TB
+
+    class sistema {
+        produtos : dict
+        clientes : dict
+        vendas : dict
+        compras : dict
+        caixa : float
+    }
+
+    class produto {
+        nome : str
+        categoria : str
+        tamanho : str
+        cor : str
+        preco_custo : float
+        preco_venda : float
+        quantidade : int
+    }
+
+    class cliente {
+        nome : str
+        telefone : str
+        cidade : str
+    }
+
+    class venda {
+        cliente : int
+        itens : dict
+        desconto : float
+        total : float
+        forma_pagamento : str
+    }
+
+    class compra {
+        fornecedor : str
+        itens : dict
+        total : float
+    }
+
+    sistema "1" *-- "0..*" produto : produtos[codigo]
+    sistema "1" *-- "0..*" cliente : clientes[codigo]
+    sistema "1" *-- "0..*" venda : vendas[codigo]
+    sistema "1" *-- "0..*" compra : compras[codigo]
+    venda "0..*" --> "1" cliente : cliente = codigo
+    venda "1" --> "1..*" produto : itens[codigo] = quantidade
+    compra "1" --> "1..*" produto : itens[codigo] = quantidade
+
+    note for sistema "Dicionário único passado para todas as funções do Time 6.\nAs chaves de produtos, clientes, vendas e compras são códigos inteiros."
+    note for venda "itens é um dicionário codigo_produto → quantidade.\ndesconto é percentual (0 a 100). total já vem com desconto aplicado."
+        </pre>
+      </div>
+      <p class="caption">Losango cheio (composição) = "está dentro de". Seta simples = "referencia pelo código".</p>
+
+      <h3>Exemplo real do dicionário <code>sistema</code></h3>
+      <pre class="code">sistema = {
+    "produtos": {
+        1: {"nome": "Camiseta básica", "categoria": "Camiseta", "tamanho": "M",
+            "cor": "Preta", "preco_custo": 20.0, "preco_venda": 45.0, "quantidade": 10},
+        2: {"nome": "Calça jeans", "categoria": "Calça", "tamanho": "38",
+            "cor": "Azul", "preco_custo": 60.0, "preco_venda": 129.9, "quantidade": 4},
+    },
+    "clientes": {
+        1: {"nome": "Maria Silva", "telefone": "(11) 99999-0000", "cidade": "São Paulo"},
+    },
+    "vendas": {
+        1: {"cliente": 1, "itens": {1: 2, 2: 1}, "desconto": 10.0,
+            "total": 197.91, "forma_pagamento": "pix"},
+    },
+    "compras": {
+        1: {"fornecedor": "Atacado Moda Center", "itens": {1: 10}, "total": 200.0},
+    },
+    "caixa": -2.09,
+}</pre>
+
+      <h3>Dicionário de dados</h3>
+      <table>
+        <tr><th>Dicionário</th><th>Chave</th><th>Campo</th><th>Tipo</th><th>Regra</th></tr>
+        <tr><td rowspan="7"><code>produtos</code></td><td rowspan="7">código (int)</td><td>nome</td><td>str</td><td>obrigatório</td></tr>
+        <tr><td>categoria</td><td>str</td><td>ex.: Camiseta, Calça, Vestido, Acessório</td></tr>
+        <tr><td>tamanho</td><td>str</td><td>PP, P, M, G, GG ou numérico</td></tr>
+        <tr><td>cor</td><td>str</td><td>—</td></tr>
+        <tr><td>preco_custo</td><td>float</td><td>≥ 0 — quanto a loja pagou</td></tr>
+        <tr><td>preco_venda</td><td>float</td><td>≥ preco_custo (aviso se menor)</td></tr>
+        <tr><td>quantidade</td><td>int</td><td>≥ 0 — nunca negativo</td></tr>
+        <tr><td rowspan="3"><code>clientes</code></td><td rowspan="3">código (int)</td><td>nome</td><td>str</td><td>obrigatório</td></tr>
+        <tr><td>telefone</td><td>str</td><td>texto livre</td></tr>
+        <tr><td>cidade</td><td>str</td><td>—</td></tr>
+        <tr><td rowspan="5"><code>vendas</code></td><td rowspan="5">código (int)</td><td>cliente</td><td>int</td><td>código existente em clientes</td></tr>
+        <tr><td>itens</td><td>dict</td><td>{codigo_produto: quantidade}, ao menos 1 item</td></tr>
+        <tr><td>desconto</td><td>float</td><td>0 a 100 (%)</td></tr>
+        <tr><td>total</td><td>float</td><td>já com desconto aplicado</td></tr>
+        <tr><td>forma_pagamento</td><td>str</td><td>pix, dinheiro, cartão</td></tr>
+        <tr><td rowspan="3"><code>compras</code></td><td rowspan="3">código (int)</td><td>fornecedor</td><td>str</td><td>obrigatório</td></tr>
+        <tr><td>itens</td><td>dict</td><td>{codigo_produto: quantidade}</td></tr>
+        <tr><td>total</td><td>float</td><td>soma de preco_custo × quantidade</td></tr>
+        <tr><td><code>caixa</code></td><td>—</td><td>—</td><td>float</td><td>+ vendas, − compras; pode ficar negativo</td></tr>
+      </table>
+    </section>
+
+    <!-- ===================== 8. SEQUÊNCIA ===================== -->
+    <section id="sequencia">
+      <span class="section-tag">Visão UML</span>
+      <h2>8. Diagramas de sequência</h2>
+      <p class="lead">A ordem exata das chamadas em cada operação. É o roteiro que o Time 6 segue para escrever cada <code>fluxo_*</code>.</p>
+
+      <h3>8.1 Registrar venda — o fluxo que cruza todos os times</h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor V as Vendedora
+    participant M as main.py<br/>(T6 Integração)
+    participant I as interface.py<br/>(T1)
+    participant C as coleta.py<br/>(T2)
+    participant CA as cadastro.py<br/>(T3)
+    participant E as estoque.py<br/>(T5)
+    participant K as calculos.py<br/>(T4)
+
+    V->>M: escolhe "Vendas → Nova venda"
+    M->>I: exibir_tabela_clientes(clientes)
+    M->>C: ler_inteiro("Código do cliente")
+    C-->>M: codigo_cliente
+    M->>CA: buscar_cliente(clientes, codigo_cliente)
+    CA-->>M: cliente ou None
+
+    alt cliente não encontrado
+        M->>I: exibir_mensagem("Cliente não encontrado", "erro")
+        M-->>V: volta ao menu
+    end
+
+    loop até a vendedora responder "não" em "Adicionar outro item?"
+        M->>I: exibir_tabela_produtos(produtos)
+        M->>C: coletar_item()
+        C-->>M: {codigo, quantidade}
+        M->>E: verificar_disponibilidade(produtos, codigo, quantidade)
+        E->>CA: buscar_produto(produtos, codigo)
+        CA-->>E: produto ou None
+        E-->>M: True / False
+        alt disponível
+            M->>M: itens[codigo] = quantidade
+        else sem estoque ou código inválido
+            M->>I: exibir_mensagem("Sem estoque suficiente", "erro")
+        end
+        M->>C: confirmar("Adicionar outro item?")
+        C-->>M: True / False
+    end
+
+    M->>K: calcular_total_itens(itens, produtos)
+    K-->>M: total_bruto
+    M->>C: coletar_desconto()
+    C-->>M: percentual
+    M->>K: aplicar_desconto(total_bruto, percentual)
+    K-->>M: total_final
+    M->>C: coletar_forma_pagamento()
+    C-->>M: forma_pagamento
+    M->>I: exibir_mensagem("Total: R$ ...", "info")
+    M->>C: confirmar("Finalizar venda?")
+    C-->>M: True
+
+    M->>E: baixar_estoque_itens(produtos, itens)
+    M->>CA: registrar_venda(vendas, venda)
+    CA-->>M: codigo_venda
+    M->>M: atualizar_caixa(sistema, +total_final)
+    M->>I: exibir_recibo(venda, produtos, clientes)
+    I-->>V: recibo na tela
+        </pre>
+      </div>
+      <p class="caption">Repare que <code>main.py</code> nunca mexe diretamente em <code>produtos[codigo]["quantidade"]</code>: ele pede para o Estoque fazer isso. Cada time é dono do seu pedaço.</p>
+
+      <h3>8.2 Registrar compra (reposição de estoque)</h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor V as Vendedora
+    participant M as main.py (T6)
+    participant I as interface.py (T1)
+    participant C as coleta.py (T2)
+    participant CA as cadastro.py (T3)
+    participant E as estoque.py (T5)
+    participant K as calculos.py (T4)
+
+    V->>M: escolhe "Compras → Nova compra"
+    M->>C: ler_texto("Nome do fornecedor")
+    C-->>M: fornecedor
+
+    loop até responder "não"
+        M->>I: exibir_tabela_produtos(produtos)
+        M->>C: coletar_item()
+        C-->>M: {codigo, quantidade}
+        M->>CA: buscar_produto(produtos, codigo)
+        CA-->>M: produto ou None
+        alt produto existe
+            M->>M: itens[codigo] = quantidade
+        else não existe
+            M->>I: exibir_mensagem("Cadastre o produto antes de comprar", "aviso")
+        end
+        M->>C: confirmar("Adicionar outro item?")
+    end
+
+    M->>K: calcular_total_compra(itens, produtos)
+    Note over K: usa preco_custo, não preco_venda
+    K-->>M: total
+    M->>C: confirmar("Confirmar compra de R$ ...?")
+    C-->>M: True
+    M->>E: repor_estoque_itens(produtos, itens)
+    M->>CA: registrar_compra(compras, compra)
+    CA-->>M: codigo_compra
+    M->>M: atualizar_caixa(sistema, -total)
+    M->>I: exibir_mensagem("Compra registrada, estoque atualizado", "ok")
+        </pre>
+      </div>
+
+      <h3>8.3 Cadastrar produto</h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor V as Vendedora
+    participant M as main.py (T6)
+    participant C as coleta.py (T2)
+    participant I as interface.py (T1)
+    participant CA as cadastro.py (T3)
+
+    V->>M: escolhe "Produtos → Cadastrar"
+    M->>C: coletar_dados_produto()
+    loop para cada campo
+        C->>C: ler_texto / ler_decimal / ler_inteiro
+        opt valor inválido
+            C->>I: exibir_mensagem("Valor inválido", "erro")
+            C->>C: pergunta de novo
+        end
+    end
+    C-->>M: dados (dict sem código)
+    M->>CA: cadastrar_produto(produtos, dados)
+    CA->>CA: gerar_codigo(produtos)
+    CA->>CA: produtos[codigo] = dados
+    CA-->>M: codigo
+    M->>I: exibir_mensagem("Produto 3 cadastrado", "ok")
+        </pre>
+      </div>
+
+      <h3>8.4 Atualizar um produto</h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor V as Vendedora
+    participant M as main.py (T6)
+    participant I as interface.py (T1)
+    participant C as coleta.py (T2)
+    participant CA as cadastro.py (T3)
+    participant A as atualizacao.py (T6)
+
+    V->>M: escolhe "Produtos → Atualizar"
+    M->>I: exibir_tabela_produtos(produtos)
+    M->>C: ler_inteiro("Código do produto")
+    C-->>M: codigo
+    M->>CA: buscar_produto(produtos, codigo)
+    CA-->>M: produto ou None
+    alt None
+        M->>I: exibir_mensagem("Produto não encontrado", "erro")
+    else encontrado
+        M->>I: exibir_produto(codigo, produto)
+        M->>C: ler_opcao("Campo a alterar", ["nome","tamanho","cor","preco_custo","preco_venda"])
+        C-->>M: campo
+        M->>C: ler_texto / ler_decimal conforme o campo
+        C-->>M: novo_valor
+        M->>A: atualizar_produto(produtos, codigo, campo, novo_valor)
+        A-->>M: True
+        M->>I: exibir_mensagem("Produto atualizado", "ok")
+    end
+    Note over M,A: Quantidade NÃO se altera aqui — só por venda ou compra (Time 5).
+        </pre>
+      </div>
+    </section>
+
+    <!-- ===================== 9. ATIVIDADES ===================== -->
+    <section id="atividades">
+      <span class="section-tag">Visão UML</span>
+      <h2>9. Diagramas de atividade</h2>
+      <p class="lead">O caminho das decisões: o laço do menu principal e a lógica interna da venda.</p>
+
+      <h3>9.1 Laço principal do sistema (<code>executar_sistema</code>)</h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+flowchart TD
+    S((início)) --> D["sistema = criar_sistema()"]
+    D --> H["exibir_cabecalho()"]
+    H --> MENU["exibir_menu_principal()"]
+    MENU --> OP["opcao = ler_opcao(..., ['0'..'6'])"]
+    OP --> Q{opcao}
+    Q -->|1| P["menu_produtos(sistema)"]
+    Q -->|2| CL["menu_clientes(sistema)"]
+    Q -->|3| VE["menu_vendas(sistema)"]
+    Q -->|4| CO["menu_compras(sistema)"]
+    Q -->|5| ES["menu_estoque(sistema)"]
+    Q -->|6| RE["menu_relatorios(sistema)"]
+    Q -->|0| F["exibir_mensagem('Até logo!')"]
+    P --> MENU
+    CL --> MENU
+    VE --> MENU
+    CO --> MENU
+    ES --> MENU
+    RE --> MENU
+    F --> FIM((fim))
+
+    classDef t1 fill:#dbeafe,stroke:#3b82f6;
+    classDef t2 fill:#d1fae5,stroke:#10b981;
+    classDef t6 fill:#fce7f3,stroke:#ec4899;
+    class H,MENU,F t1; class OP t2; class P,CL,VE,CO,ES,RE,D t6;
+        </pre>
+      </div>
+      <p class="caption">Cada submenu tem o mesmo formato: exibe opções → lê opção → chama um <code>fluxo_*</code> → volta, até a vendedora escolher 0.</p>
+
+      <h3>9.2 Lógica interna de <code>fluxo_realizar_venda</code></h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+flowchart TD
+    S((início)) --> A["exibir_tabela_clientes · ler_inteiro"]
+    A --> B{"buscar_cliente<br/>encontrou?"}
+    B -->|não| ERR1["exibir_mensagem erro"] --> FIM((fim))
+    B -->|sim| C["itens = {}"]
+    C --> D["exibir_tabela_produtos · coletar_item"]
+    D --> E{"verificar_disponibilidade?"}
+    E -->|não| ERR2["exibir_mensagem 'sem estoque'"] --> G
+    E -->|sim| F["itens[codigo] = quantidade"] --> G
+    G{"confirmar<br/>'Adicionar outro item?'"}
+    G -->|sim| D
+    G -->|não| H{"itens vazio?"}
+    H -->|sim| ERR3["exibir_mensagem 'venda cancelada'"] --> FIM
+    H -->|não| I["total = calcular_total_itens"]
+    I --> J["desconto = coletar_desconto"]
+    J --> K["total = aplicar_desconto"]
+    K --> L["forma = coletar_forma_pagamento"]
+    L --> M{"confirmar<br/>'Finalizar venda?'"}
+    M -->|não| ERR3
+    M -->|sim| N["baixar_estoque_itens"]
+    N --> O["registrar_venda"]
+    O --> P["atualizar_caixa(+total)"]
+    P --> Q["exibir_recibo"]
+    Q --> FIM
+
+    classDef t1 fill:#dbeafe,stroke:#3b82f6;
+    classDef t2 fill:#d1fae5,stroke:#10b981;
+    classDef t3 fill:#fef3c7,stroke:#f59e0b;
+    classDef t4 fill:#ede9fe,stroke:#8b5cf6;
+    classDef t5 fill:#fee2e2,stroke:#ef4444;
+    classDef t6 fill:#fce7f3,stroke:#ec4899;
+    class ERR1,ERR2,ERR3,Q t1; class J,L t2; class B,O t3; class I,K t4; class E,N t5; class C,F,P,A,D,G,H,M t6;
+        </pre>
+      </div>
+      <p class="caption">As cores indicam de qual time é a função executada em cada passo. Passos rosa são lógica própria do Time 6.</p>
+    </section>
+
+    <!-- ===================== 10. ESTADOS ===================== -->
+    <section id="estados">
+      <span class="section-tag">Visão UML</span>
+      <h2>10. Diagramas de estado</h2>
+      <p class="lead">Como um produto muda de situação no estoque e como o sistema navega entre menus.</p>
+
+      <h3>10.1 Ciclo de vida de um produto no estoque</h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+stateDiagram-v2
+    direction TB
+    [*] --> Cadastrado : cadastrar_produto()
+
+    Cadastrado --> Disponivel : quantidade > minimo
+    Cadastrado --> Baixo : 0 < quantidade <= minimo
+    Cadastrado --> Esgotado : quantidade == 0
+
+    Disponivel --> Baixo : baixar_estoque() deixa quantidade <= minimo
+    Baixo --> Esgotado : baixar_estoque() zera
+    Baixo --> Disponivel : repor_estoque() passa do minimo
+    Esgotado --> Baixo : repor_estoque() pouca quantidade
+    Esgotado --> Disponivel : repor_estoque() acima do minimo
+    Disponivel --> Disponivel : baixar / repor sem cruzar o minimo
+
+    Disponivel --> [*] : remover_produto()
+    Baixo --> [*] : remover_produto()
+    Esgotado --> [*] : remover_produto()
+
+    note right of Esgotado
+        verificar_disponibilidade() devolve False.
+        Não pode ser vendido até repor.
+    end note
+    note right of Baixo
+        aparece em produtos_em_falta()
+        no relatório de estoque (minimo padrão = 3)
+    end note
+        </pre>
+      </div>
+      <p class="caption">A função <code>situacao_produto(produto, minimo)</code> do Time 5 devolve o nome do estado: <code>"OK"</code>, <code>"BAIXO"</code> ou <code>"ESGOTADO"</code>.</p>
+
+      <h3>10.2 Navegação entre menus</h3>
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+stateDiagram-v2
+    [*] --> MenuPrincipal
+    MenuPrincipal --> MenuProdutos : 1
+    MenuPrincipal --> MenuClientes : 2
+    MenuPrincipal --> MenuVendas : 3
+    MenuPrincipal --> MenuCompras : 4
+    MenuPrincipal --> MenuEstoque : 5
+    MenuPrincipal --> MenuRelatorios : 6
+    MenuPrincipal --> [*] : 0 sair
+
+    state MenuProdutos {
+        [*] --> EscolhaP
+        EscolhaP --> Cadastrar : 1
+        EscolhaP --> Listar : 2
+        EscolhaP --> Atualizar : 3
+        EscolhaP --> Remover : 4
+        Cadastrar --> EscolhaP
+        Listar --> EscolhaP
+        Atualizar --> EscolhaP
+        Remover --> EscolhaP
+    }
+    MenuProdutos --> MenuPrincipal : 0 voltar
+
+    state MenuVendas {
+        [*] --> EscolhaV
+        EscolhaV --> NovaVenda : 1
+        EscolhaV --> ListarVendas : 2
+        NovaVenda --> EscolhaV
+        ListarVendas --> EscolhaV
+    }
+    MenuVendas --> MenuPrincipal : 0 voltar
+
+    MenuClientes --> MenuPrincipal : 0 voltar
+    MenuCompras --> MenuPrincipal : 0 voltar
+    MenuEstoque --> MenuPrincipal : 0 voltar
+    MenuRelatorios --> MenuPrincipal : 0 voltar
+        </pre>
+      </div>
+    </section>
+
+    <!-- ===================== 11. JORNADA ===================== -->
+    <section id="jornada">
+      <span class="section-tag">Visão UML</span>
+      <h2>11. Jornada do usuário</h2>
+      <p class="lead">A experiência da vendedora de ponta a ponta, com a nota de satisfação em cada passo. Mostra onde o sistema realmente ajuda.</p>
+
+      <div class="diagram">
+        <span class="hint">clique para ampliar</span>
+        <pre class="mermaid">
+journey
+    title Jornada da Ana: do pedido no Instagram ao estoque atualizado
+    section Antes do sistema (hoje)
+      Recebe pedido da cliente: 4: Ana
+      Confere no armário se tem a peça: 2: Ana
+      Faz a conta na calculadora: 2: Ana
+      Anota no caderno e esquece o estoque: 1: Ana
+    section Com o sistema — venda
+      Abre o menu e escolhe Nova venda: 5: Ana
+      Informa a cliente e os itens: 4: Ana
+      Vê na hora se tem estoque: 5: Ana, Sistema
+      Desconto, pix e recibo pronto: 5: Ana, Sistema
+    section Depois da venda
+      Estoque e caixa atualizados sozinhos: 5: Sistema
+      Alerta de produto em falta: 4: Ana, Sistema
+    section Reposição
+      Registra compra do fornecedor: 4: Ana
+      Consulta relatório financeiro: 5: Ana, Sistema
+        </pre>
+      </div>
+      <p class="caption">Escala 1 (frustrante) a 5 (ótimo). Os passos de nota baixa na primeira seção são exatamente os problemas que o sistema resolve.</p>
+
+      <h3>Jornada em texto — cenário de teste de aceitação</h3>
+      <ol class="steps">
+        <li><strong>Preparar</strong> — rodar <code>python main.py</code>. O sistema sobe com os dados de exemplo de <code>dados.py</code> (2 produtos, 1 cliente).</li>
+        <li><strong>Cadastrar</strong> — cadastrar um vestido (custo 50, venda 120, qtd 3) e uma nova cliente. Verificar que receberam códigos 3 e 2.</li>
+        <li><strong>Vender</strong> — vender 2 camisetas e 1 vestido para a cliente 2, com 10% de desconto, no pix. Total esperado: (2×45 + 120) × 0,9 = <strong>R$ 189,00</strong>.</li>
+        <li><strong>Conferir estoque</strong> — camiseta deve estar com 8, vestido com 1 (situação BAIXO). Caixa = 189,00.</li>
+        <li><strong>Tentar vender além do estoque</strong> — tentar 5 vestidos. Sistema deve recusar o item sem cancelar a venda inteira.</li>
+        <li><strong>Repor</strong> — comprar 10 vestidos do fornecedor. Total = 500,00. Estoque do vestido = 11. Caixa = −311,00.</li>
+        <li><strong>Atualizar</strong> — mudar o preço de venda do vestido para 130. Listar e confirmar.</li>
+        <li><strong>Remover</strong> — remover a cliente 1. Tentar vender para a cliente 1 → "Cliente não encontrado".</li>
+        <li><strong>Relatório</strong> — relatório financeiro deve mostrar 1 venda, 1 compra, saldo −311,00 e ticket médio 189,00.</li>
+      </ol>
+    </section>
+
+    <!-- ===================== 12. CONTRATO ===================== -->
+    <section id="contrato">
+      <span class="section-tag">Construção</span>
+      <h2>12. Contrato de funções</h2>
+      <p class="lead">A lista completa, time por time. Isto é um contrato: nome, parâmetros e retorno não mudam sem combinar com quem depende.</p>
+
+      <h3><span class="pill t1">Time 1</span> interface.py — Prints estáticos</h3>
+      <table>
+        <tr><th style="width:36%">Função</th><th>Retorna</th><th>O que faz</th><th>Usada por</th></tr>
+        <tr><td><code>exibir_cabecalho()</code></td><td>None</td><td>Imprime o nome da loja e uma linha decorativa.</td><td>T6</td></tr>
+        <tr><td><code>exibir_linha(tamanho=50)</code></td><td>None</td><td>Imprime uma linha de separação.</td><td>T1, T6</td></tr>
+        <tr><td><code>exibir_menu_principal()</code></td><td>None</td><td>Opções 1 a 6 e 0 para sair.</td><td>T6</td></tr>
+        <tr><td><code>exibir_menu_produtos()</code><br><code>exibir_menu_clientes()</code><br><code>exibir_menu_vendas()</code><br><code>exibir_menu_compras()</code><br><code>exibir_menu_estoque()</code><br><code>exibir_menu_relatorios()</code></td><td>None</td><td>Submenus; sempre com 0 = voltar.</td><td>T6</td></tr>
+        <tr><td><code>exibir_tabela_produtos(produtos)</code></td><td>None</td><td>Tabela alinhada: código, nome, tam., cor, preço de venda, qtd. Usa <code>formatar_moeda</code>.</td><td>T6</td></tr>
+        <tr><td><code>exibir_tabela_clientes(clientes)</code></td><td>None</td><td>Tabela: código, nome, telefone, cidade.</td><td>T6</td></tr>
+        <tr><td><code>exibir_produto(codigo, produto)</code></td><td>None</td><td>Ficha completa de um produto (todos os campos).</td><td>T6</td></tr>
+        <tr><td><code>exibir_recibo(venda, produtos, clientes)</code></td><td>None</td><td>Recibo com cliente, itens (nome × qtd × preço), desconto, total e forma de pagamento.</td><td>T6</td></tr>
+        <tr><td><code>exibir_relatorio_estoque(relatorio)</code></td><td>None</td><td>Recebe o dicionário de <code>relatorio_estoque</code> e imprime formatado.</td><td>T6</td></tr>
+        <tr><td><code>exibir_resumo_financeiro(resumo)</code></td><td>None</td><td>Recebe o dicionário de <code>resumo_financeiro</code> e imprime.</td><td>T6</td></tr>
+        <tr><td><code>exibir_mensagem(texto, tipo="info")</code></td><td>None</td><td>Prefixo por tipo: <code>"ok"</code> ✔, <code>"erro"</code> ✖, <code>"aviso"</code> ⚠, <code>"info"</code> ℹ.</td><td>T2, T6</td></tr>
+      </table>
+
+      <h3><span class="pill t2">Time 2</span> coleta.py — Coleta de dados</h3>
+      <table>
+        <tr><th style="width:36%">Função</th><th>Retorna</th><th>O que faz</th><th>Usada por</th></tr>
+        <tr><td><code>ler_texto(mensagem, obrigatorio=True)</code></td><td>str</td><td>Lê texto; repete se vazio e obrigatório. Devolve sem espaços nas pontas.</td><td>T2, T6</td></tr>
+        <tr><td><code>ler_inteiro(mensagem, minimo=None)</code></td><td>int</td><td>Repete até ser inteiro válido e ≥ mínimo. Usa <code>exibir_mensagem</code> no erro.</td><td>T2, T6</td></tr>
+        <tr><td><code>ler_decimal(mensagem, minimo=0.0)</code></td><td>float</td><td>Aceita vírgula ou ponto. Repete até válido.</td><td>T2, T6</td></tr>
+        <tr><td><code>ler_opcao(mensagem, opcoes_validas)</code></td><td>str</td><td>Repete até a resposta estar na lista (ex.: <code>["0","1","2"]</code>).</td><td>T6</td></tr>
+        <tr><td><code>confirmar(mensagem)</code></td><td>bool</td><td>Pergunta (s/n); devolve True para s/S/sim.</td><td>T6</td></tr>
+        <tr><td><code>coletar_dados_produto()</code></td><td>dict</td><td>Pergunta todos os campos de produto e devolve o dicionário pronto (sem código).</td><td>T6</td></tr>
+        <tr><td><code>coletar_dados_cliente()</code></td><td>dict</td><td>Pergunta nome, telefone e cidade.</td><td>T6</td></tr>
+        <tr><td><code>coletar_item()</code></td><td>dict</td><td>Pergunta código e quantidade (≥1). Devolve <code>{"codigo": int, "quantidade": int}</code>.</td><td>T6</td></tr>
+        <tr><td><code>coletar_desconto()</code></td><td>float</td><td>Percentual 0–100; Enter vazio = 0.</td><td>T6</td></tr>
+        <tr><td><code>coletar_forma_pagamento()</code></td><td>str</td><td>Opções pix / dinheiro / cartão.</td><td>T6</td></tr>
+      </table>
+
+      <h3><span class="pill t3">Time 3</span> cadastro.py — Cadastro de dados</h3>
+      <table>
+        <tr><th style="width:36%">Função</th><th>Retorna</th><th>O que faz</th><th>Usada por</th></tr>
+        <tr><td><code>gerar_codigo(dicionario)</code></td><td>int</td><td>Maior chave + 1; 1 se vazio.</td><td>T3</td></tr>
+        <tr><td><code>existe(dicionario, codigo)</code></td><td>bool</td><td>Se o código é chave do dicionário.</td><td>T5, T6</td></tr>
+        <tr><td><code>cadastrar_produto(produtos, dados)</code></td><td>int (código)</td><td>Gera código e grava <code>produtos[codigo] = dados</code>.</td><td>T6</td></tr>
+        <tr><td><code>cadastrar_cliente(clientes, dados)</code></td><td>int (código)</td><td>Idem para clientes.</td><td>T6</td></tr>
+        <tr><td><code>registrar_venda(vendas, venda)</code></td><td>int (código)</td><td>Grava a venda já montada pelo T6.</td><td>T6</td></tr>
+        <tr><td><code>registrar_compra(compras, compra)</code></td><td>int (código)</td><td>Grava a compra já montada pelo T6.</td><td>T6</td></tr>
+        <tr><td><code>buscar_produto(produtos, codigo)</code></td><td>dict ou None</td><td>Devolve o produto ou None. <strong>Função mais usada do sistema.</strong></td><td>T4, T5, T6</td></tr>
+        <tr><td><code>buscar_cliente(clientes, codigo)</code></td><td>dict ou None</td><td>Idem para clientes.</td><td>T6</td></tr>
+        <tr><td><code>buscar_produto_por_nome(produtos, trecho)</code></td><td>dict</td><td>Subdicionário <code>{codigo: produto}</code> cujo nome contém o trecho (sem diferenciar maiúsculas).</td><td>T6</td></tr>
+      </table>
+
+      <h3><span class="pill t4">Time 4</span> calculos.py — Manipulações matemáticas</h3>
+      <table>
+        <tr><th style="width:36%">Função</th><th>Retorna</th><th>O que faz</th><th>Usada por</th></tr>
+        <tr><td><code>calcular_subtotal(preco_unitario, quantidade)</code></td><td>float</td><td>preço × quantidade, arredondado a 2 casas.</td><td>T4, T1</td></tr>
+        <tr><td><code>calcular_total_itens(itens, produtos)</code></td><td>float</td><td>Soma de preco_venda × qtd para cada item. Usa <code>buscar_produto</code>.</td><td>T6</td></tr>
+        <tr><td><code>calcular_total_compra(itens, produtos)</code></td><td>float</td><td>Igual, mas com preco_custo.</td><td>T6</td></tr>
+        <tr><td><code>aplicar_desconto(valor, percentual)</code></td><td>float</td><td>valor × (1 − percentual/100).</td><td>T6</td></tr>
+        <tr><td><code>calcular_troco(total, valor_pago)</code></td><td>float</td><td>valor_pago − total (para pagamento em dinheiro).</td><td>T6</td></tr>
+        <tr><td><code>calcular_margem(preco_custo, preco_venda)</code></td><td>float (%)</td><td>(venda − custo) / custo × 100. Custo 0 → 0.</td><td>T1, T6</td></tr>
+        <tr><td><code>calcular_lucro_venda(itens, produtos)</code></td><td>float</td><td>Soma de (venda − custo) × qtd.</td><td>T6</td></tr>
+        <tr><td><code>calcular_valor_estoque(produtos)</code></td><td>dict</td><td><code>{"custo": x, "venda": y, "lucro_potencial": y − x}</code> somando tudo que há em estoque.</td><td>T6</td></tr>
+        <tr><td><code>resumo_financeiro(vendas, compras)</code></td><td>dict</td><td><code>{"total_vendas", "total_compras", "saldo", "qtd_vendas", "qtd_compras", "ticket_medio"}</code>.</td><td>T6</td></tr>
+        <tr><td><code>formatar_moeda(valor)</code></td><td>str</td><td><code>1234.5</code> → <code>"R$ 1.234,50"</code>.</td><td>T1</td></tr>
+      </table>
+
+      <h3><span class="pill t5">Time 5</span> estoque.py — Controle de estoque</h3>
+      <table>
+        <tr><th style="width:36%">Função</th><th>Retorna</th><th>O que faz</th><th>Usada por</th></tr>
+        <tr><td><code>verificar_disponibilidade(produtos, codigo, quantidade)</code></td><td>bool</td><td>True se o produto existe e tem quantidade ≥ pedida.</td><td>T6</td></tr>
+        <tr><td><code>baixar_estoque(produtos, codigo, quantidade)</code></td><td>bool</td><td>Subtrai; False se ficaria negativo (não altera).</td><td>T5</td></tr>
+        <tr><td><code>repor_estoque(produtos, codigo, quantidade)</code></td><td>bool</td><td>Soma; False se o produto não existe.</td><td>T5</td></tr>
+        <tr><td><code>baixar_estoque_itens(produtos, itens)</code></td><td>bool</td><td>Aplica <code>baixar_estoque</code> a cada item de uma venda.</td><td>T6</td></tr>
+        <tr><td><code>repor_estoque_itens(produtos, itens)</code></td><td>bool</td><td>Aplica <code>repor_estoque</code> a cada item de uma compra.</td><td>T6</td></tr>
+        <tr><td><code>situacao_produto(produto, minimo=3)</code></td><td>str</td><td><code>"ESGOTADO"</code> (0), <code>"BAIXO"</code> (≤ mínimo) ou <code>"OK"</code>.</td><td>T5, T1</td></tr>
+        <tr><td><code>produtos_em_falta(produtos, minimo=3)</code></td><td>dict</td><td>Subdicionário dos produtos com 0 &lt; qtd ≤ mínimo.</td><td>T5, T6</td></tr>
+        <tr><td><code>produtos_esgotados(produtos)</code></td><td>dict</td><td>Subdicionário dos produtos com qtd = 0.</td><td>T5, T6</td></tr>
+        <tr><td><code>relatorio_estoque(produtos, minimo=3)</code></td><td>dict</td><td><code>{"total_produtos", "total_pecas", "em_falta": {...}, "esgotados": {...}}</code>.</td><td>T6</td></tr>
+      </table>
+
+      <h3><span class="pill t6">Time 6</span> atualizacao.py + main.py — Atualizações e Integração</h3>
+      <table>
+        <tr><th style="width:36%">Função</th><th>Retorna</th><th>O que faz</th><th>Usa</th></tr>
+        <tr><td><code>atualizar_produto(produtos, codigo, campo, novo_valor)</code></td><td>bool</td><td>Altera um campo (exceto quantidade). False se código ou campo inválidos.</td><td>T3</td></tr>
+        <tr><td><code>atualizar_cliente(clientes, codigo, campo, novo_valor)</code></td><td>bool</td><td>Idem para clientes.</td><td>T3</td></tr>
+        <tr><td><code>remover_produto(produtos, codigo)</code></td><td>bool</td><td><code>del produtos[codigo]</code> se existir.</td><td>T3</td></tr>
+        <tr><td><code>remover_cliente(clientes, codigo)</code></td><td>bool</td><td>Idem.</td><td>T3</td></tr>
+        <tr><td><code>atualizar_caixa(sistema, valor)</code></td><td>float (novo saldo)</td><td>Soma o valor (positivo na venda, negativo na compra).</td><td>—</td></tr>
+        <tr><td><code>fluxo_cadastrar_produto(sistema)</code><br><code>fluxo_listar_produtos(sistema)</code><br><code>fluxo_atualizar_produto(sistema)</code><br><code>fluxo_remover_produto(sistema)</code></td><td>None</td><td>CRUD completo de produtos, seguindo os diagramas de sequência.</td><td>T1, T2, T3, T6</td></tr>
+        <tr><td><code>fluxo_cadastrar_cliente(sistema)</code><br><code>fluxo_listar_clientes(sistema)</code><br><code>fluxo_atualizar_cliente(sistema)</code><br><code>fluxo_remover_cliente(sistema)</code></td><td>None</td><td>CRUD completo de clientes.</td><td>T1, T2, T3, T6</td></tr>
+        <tr><td><code>fluxo_realizar_venda(sistema)</code></td><td>None</td><td>Sequência 8.1 completa.</td><td>todos</td></tr>
+        <tr><td><code>fluxo_listar_vendas(sistema)</code></td><td>None</td><td>Lista vendas com recibo resumido.</td><td>T1</td></tr>
+        <tr><td><code>fluxo_realizar_compra(sistema)</code></td><td>None</td><td>Sequência 8.2 completa.</td><td>todos</td></tr>
+        <tr><td><code>fluxo_relatorio_estoque(sistema)</code></td><td>None</td><td>Chama <code>relatorio_estoque</code> + <code>calcular_valor_estoque</code> e exibe.</td><td>T1, T4, T5</td></tr>
+        <tr><td><code>fluxo_relatorio_financeiro(sistema)</code></td><td>None</td><td>Chama <code>resumo_financeiro</code> e exibe.</td><td>T1, T4</td></tr>
+        <tr><td><code>menu_produtos(sistema)</code> ... <code>menu_relatorios(sistema)</code></td><td>None</td><td>Laço de cada submenu.</td><td>T1, T2</td></tr>
+        <tr><td><code>executar_sistema(sistema)</code></td><td>None</td><td>Laço do menu principal (atividade 9.1).</td><td>todos</td></tr>
+      </table>
+    </section>
+
+    <!-- ===================== 13. INTEGRAÇÃO ===================== -->
+    <section id="integracao">
+      <span class="section-tag">Construção</span>
+      <h2>13. Plano de integração</h2>
+      <p class="lead">Como sair de seis arquivos soltos para um sistema que roda. Em etapas, cada uma com algo testável.</p>
+
+      <ol class="steps">
+        <li><strong>Contrato fechado (todos)</strong> — cada time lê a sua tabela da seção 12 e o esqueleto em <code>esqueleto/</code>. Dúvidas sobre nome, parâmetro ou retorno são resolvidas <em>antes</em> de codar. Depois disso, mudar o contrato exige avisar quem depende.</li>
+        <li><strong>Base de dados de teste (todos)</strong> — todos usam o mesmo <code>dados.py</code> com <code>criar_sistema()</code>. Assim os testes de cada time batem com os dos outros.</li>
+        <li><strong>Implementação isolada (cada time)</strong> — cada dupla preenche suas funções e testa num bloco <code>if __name__ == "__main__":</code> no fim do próprio arquivo, chamando as funções com o dicionário de exemplo. Time 3 e Time 4 primeiro, pois são a base.</li>
+        <li><strong>Integração 1 — Cadastro e listagem</strong> — Time 6 liga menu + <code>fluxo_cadastrar_produto</code> + <code>fluxo_listar_produtos</code>. Envolve T1, T2, T3, T4 e T6. Meta: cadastrar e ver na tabela.</li>
+        <li><strong>Integração 2 — Venda completa</strong> — <code>fluxo_realizar_venda</code> com estoque e recibo. Envolve todos. Meta: o cenário da seção 11 até o passo 5.</li>
+        <li><strong>Integração 3 — Compra, atualizar, remover, relatórios</strong> — fecha o CRUD e os relatórios. Meta: cenário da seção 11 completo.</li>
+        <li><strong>Teste cruzado</strong> — cada time testa o fluxo de <em>outro</em> time tentando quebrá-lo (letra onde é número, código inexistente, quantidade zero, Enter vazio). Bugs vão para o time dono da função.</li>
+        <li><strong>Apresentação</strong> — cada time apresenta 1 função sua e 1 função de outro time que ela chama ou que a chama, explicando o encaixe.</li>
+      </ol>
+
+      <h3>Como rodar</h3>
+      <pre class="code"># dentro da pasta com os 8 arquivos .py
+python main.py</pre>
+
+      <h3>Checklist de entrega por time</h3>
+      <table>
+        <tr><th>Item</th><th>Critério</th></tr>
+        <tr><td>Todas as funções do contrato existem</td><td>Com os nomes e parâmetros exatos da seção 12.</td></tr>
+        <tr><td>Nenhuma variável global alterada</td><td>Sem <code>global</code>; tudo vem por parâmetro.</td></tr>
+        <tr><td>Docstring em cada função</td><td>Uma ou duas linhas.</td></tr>
+        <tr><td>Bloco de teste no fim do arquivo</td><td><code>if __name__ == "__main__":</code> chamando as funções com <code>criar_sistema()</code>.</td></tr>
+        <tr><td>Roda sem erro ao importar</td><td><code>python -c "import nome_do_arquivo"</code> não dá erro.</td></tr>
+        <tr><td>Só funções e dicionários</td><td>Sem <code>class</code>, sem bibliotecas externas, sem arquivos.</td></tr>
+      </table>
+    </section>
+
+    <!-- ===================== 14. SUGESTÕES ===================== -->
+    <section id="sugestoes">
+      <span class="section-tag">Construção</span>
+      <h2>14. Sugestões de melhoria na divisão dos times</h2>
+      <p class="lead">Ajustes pensados a partir do mapa de dependências.</p>
+
+      <div class="cards">
+        <div class="card">
+          <h3>Separar "Integração" de "Atualização"</h3>
+          <p>O Time 6 hoje acumula o CRUD de atualizar/remover <strong>e</strong> o <code>main.py</code>, que é a parte que mais quebra. Se houver gente suficiente, um <strong>Time 7 — Integração e Testes</strong> cuidando só de <code>main.py</code> e do cenário de teste da seção 11 deixa o sistema mais estável. Alternativa: o papel de "integrador" rotaciona entre os times a cada etapa.</p>
+        </div>
+        <div class="card">
+          <h3>Venda e compra pertencem à integração</h3>
+          <p>No quadro, "venda/compra" era uma bolha separada. No modelo, elas não são um módulo: são <em>fluxos</em> que combinam Coleta + Cadastro + Estoque + Cálculos + Interface. Por isso ficaram em <code>main.py</code> como <code>fluxo_realizar_venda</code> e <code>fluxo_realizar_compra</code>.</p>
+        </div>
+        <div class="card">
+          <h3>Cadastro é a base: comece por ele</h3>
+          <p><code>buscar_produto</code> é usada por três times. Sugestão: o Time 3 entrega <code>gerar_codigo</code>, <code>buscar_produto</code> e <code>buscar_cliente</code> no primeiro dia, para desbloquear Estoque e Cálculos.</p>
+        </div>
+        <div class="card">
+          <h3>Stubs para ninguém ficar parado</h3>
+          <p>Enquanto a função real não existe, o Time 6 usa uma versão falsa que só devolve um valor fixo (ex.: <code>return True</code>). Assim o menu já roda no primeiro dia e os times trocam a função falsa pela real quando ficar pronta.</p>
+        </div>
+        <div class="card">
+          <h3>Venda sem cliente cadastrado</h3>
+          <p>Extensão simples: aceitar código 0 como "Consumidor final" em <code>fluxo_realizar_venda</code>. Evita travar a venda quando a vendedora não quer cadastrar o cliente.</p>
+        </div>
+        <div class="card">
+          <h3>Desafio extra (fora do escopo base)</h3>
+          <p>Para quem terminar antes: busca de produto por nome (<code>buscar_produto_por_nome</code>), troco para pagamento em dinheiro (<code>calcular_troco</code>) e ranking de produtos mais vendidos a partir de <code>vendas</code>. Tudo continua só com funções e dicionários.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Desafio CRUD Completo 2026 · Material didático · Diagramas em <a href="https://mermaid.js.org/" target="_blank" rel="noopener">Mermaid</a> ·
+      Repositório: <a href="https://github.com/Kazenski/site-desafio-crud-completo-2026" target="_blank" rel="noopener">Kazenski/site-desafio-crud-completo-2026</a>
+    </footer>
+
+  </main>
+</div>
+
+<div id="lightbox" class="lightbox" aria-hidden="true"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
